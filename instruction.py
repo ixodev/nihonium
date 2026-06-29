@@ -86,3 +86,22 @@ class Sub(Instruction):
     def _exec(self, stack: Stack, instr_ptr: int):
         stack.push(stack.pop() - stack.pop())
         return InstructionResults(None)
+
+@register(OpCode.MUL)
+class Mul(Instruction):
+    def __init__(self):
+        super().__init__(OpCode.MUL)
+
+    def _exec(self, stack: Stack, instr_ptr: int):
+        stack.push(stack.pop() * stack.pop())
+        return InstructionResults(None)
+
+@register(OpCode.DIV)
+class Div(Instruction):
+    def __init__(self):
+        super().__init__(OpCode.DIV)
+
+    def _exec(self, stack: Stack, instr_ptr: int):
+        stack.push(stack.pop() / stack.pop())
+        return InstructionResults(None)
+
