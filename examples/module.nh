@@ -1,0 +1,7 @@
+import stdlib.stdio
+
+var moduleGlobalVariable = "Hello"
+
+function moduleFunction() {
+    println("Hello from module!\n")
+}

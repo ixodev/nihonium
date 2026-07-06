@@ -1,0 +1,22 @@
+// This file is part of the Nihonium standard library
+// Copyright (c) ixodev
+
+var e = native eApproximation()
+var pi = native piApproximation()
+
+var abs = x -> native abs(x)
+var pow = b, e -> native pow(b, e)
+var phase = z -> native phase(z)
+var sqrt = x -> native sqrt(x)
+var rsqrt = x -> (1 / sqrt(x))
+var exp = x -> native exp(x)
+var ln = x -> native ln(x)
+var log = x, b -> (ln(x) / ln(b))
+var radians = x -> (x * pi / 180)
+var degrees = x -> (x * 180 / pi)
+var cos = x -> native cos(x)
+var sin = x -> native sin(x)
+var tan = x -> native tan(x)
+var acos = x -> native acos(x)
+var asin = x -> native asin(x)
+var atan = x -> native atan(x)

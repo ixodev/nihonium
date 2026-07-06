@@ -1,0 +1,11 @@
+import stdlib.stdio
+import stdlib.time
+
+function main(args)
+{
+    print("Size of an integer: ")
+    println(sizeof 4)
+    print("Size of a string: ")
+    println(sizeof "Hello")
+    return 0
+}

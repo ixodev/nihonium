@@ -1,0 +1,10 @@
+// This is an example nihonium program
+import stdlib.stdio
+import stdlib.time
+
+function main(args) {
+    print("Current date: ")
+    print(getDateTime())
+    println(".")
+    return 0
+}

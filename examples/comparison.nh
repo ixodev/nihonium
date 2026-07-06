@@ -1,0 +1,11 @@
+import stdlib.stdio
+
+
+function main(args) {
+
+    println(10 == 1)
+    println(-2 < -3)
+    println(2 + ~3)
+
+    return 0
+}

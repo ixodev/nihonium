@@ -1,0 +1,10 @@
+import stdlib.stdio
+import examples.module
+
+
+function main(args) {
+
+    println(moduleGlobalVariable)
+    moduleFunction()
+
+}

@@ -1,0 +1,49 @@
+// This file is part of the Nihonium standard library
+// Copyright (c) ixodev
+
+var _stdout_ = native createOutputStream(native standardOutputFileno())
+var _stdin_ = native createInputStream(native standardInputFileno())
+var _stderr_ = native createOutputStream(native standardErrorFileno())
+
+
+function print(value) {
+    write _stdout_, value
+    flush _stdout_
+}
+
+function println(value) {
+    write _stdout_, value
+    write _stdout_, "\n"
+    flush _stdout_
+}
+
+function printf(file, value) {
+    write file, value
+    flush file
+}
+
+function printfln(file, value) {
+    write file, value
+    write file, "\n"
+    flush file
+}
+
+function printn(value) {
+    write _stdout_, value
+}
+
+function printnf(file, value) {
+    write file, value
+}
+
+function readln() {
+    return read _stdin_
+}
+
+function readfln(file) {
+    return read file
+}
+
+function flushf(file) {
+    flush file
+}

@@ -1,0 +1,30 @@
+import stdlib.stdio
+import stdlib.math
+
+function main(args) {
+
+    // Prints the 10 first powers of 2
+    var x = 10
+
+    for var i = 0; i < x; i = i + 1 {
+        print("2^")
+        print(i)
+        print(" = ")
+        println(pow(2, i))
+    }
+
+    println("")
+
+    // Prints the 10 integer images by the exponential function, from range [0;9]
+    var y = 0
+
+    while y < x {
+        print("e^")
+        print(y)
+        print(" = ")
+        println(exp(y))
+        y = y + 1
+    }
+
+    return 0
+}

@@ -1,0 +1,12 @@
+import stdlib.stdio
+
+function main(args) {
+    printn("Hello, without flush")
+    printn("\n")
+    flush(_stdout_)
+
+    var b = read _stdin_
+    println(b)
+
+    return 0
+}

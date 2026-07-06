@@ -1,0 +1,12 @@
+// This is a test nihonium program
+
+import stdlib.stdio
+
+function test() {
+    // torture the interpreter with this wth expression. the output should be -114.
+    return ((((((7+(-3))*-5)-(8^(2+1)))&((64|32)^(15+1)))^((9*(-2+1))-(6&(3|2)))))+~6
+}
+
+function main (args) {
+    println(test())
+}

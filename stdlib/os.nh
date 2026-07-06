@@ -1,0 +1,3 @@
+function system(cmd) {
+    return native system(cmd)
+}

@@ -1,0 +1,13 @@
+// This file is part of the Nihonium standard library
+// Copyright (c) ixodev
+
+var getTime = () -> native getTime()
+var getDateTime = () -> native getDateTime()
+var getCurrentYear = () -> native getCurrentYear()
+var getCurrentMonth = () -> native getCurrentMonth()
+var getCurrentMonthDay = () -> native getCurrentMonthDay()
+var getCurrentWeekDay = () -> native getCurrentWeekDay()
+var getCurrentYearDay = () -> native getCurrentYearDay()
+var getCurrentWeekDayString = () -> native getCurrentWeekDayString()
+var getCurrentMinutes = () -> native getCurrentMinutes()
+var getCurrentSeconds = () -> native getCurrentSeconds()

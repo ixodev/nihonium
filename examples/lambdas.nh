@@ -1,0 +1,28 @@
+import stdlib.stdio
+import stdlib.math
+
+function t(q) {
+    return 2
+}
+
+
+function main(args) {
+
+    var u = x -> (x * x)
+    var f = x -> x * 3
+
+    var s = u + f
+
+    //println(cos(2))
+    //println(s(2))
+
+    println(phase(2 + 2 * im))
+    //println(pow(2, 2))
+    //println(im * im)
+    //println(2 * im + 2)
+    //println(exp(complex(0, pi)))
+    //println(pow(2, 2 * im))
+    println(pow(-2, 2 * im + 2))
+
+    println(complex(32, 32))
+}
