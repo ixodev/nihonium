@@ -4,6 +4,7 @@ import enum
 class OpCode(enum.IntEnum):
     PUSH = 0x00
     POP = 0x01
+    PEEK = 0x02
 
     ADD = 0x10
     SUB = 0x11
@@ -17,15 +18,28 @@ class OpCode(enum.IntEnum):
     JUMP = 0x31
 
     PRINT = 0x40
+    READ = 0x41
+
+    STORE = 0x50
+    LOAD = 0x51
+    MOV = 0x52
 
     @property
     def stride(self) -> int:
         match self:
             case OpCode.PUSH:
                 return 1
-            case OpCode.POP:
-                return 1
             case OpCode.JUMP:
+                return 1
+            case OpCode.STORE:
+                return 1
+            case OpCode.LOAD:
+                return 1
+            case OpCode.MOV:
+                return 2
+            case OpCode.PRINT:
+                return 1
+            case OpCode.READ:
                 return 1
             case _:
                 return 0

@@ -1,6 +1,6 @@
 import typing
 
-from defs import OpCode
+from opcodes import OpCode
 from instruction import *
 
 

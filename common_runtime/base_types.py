@@ -746,6 +746,9 @@ class IOStream(NoPrimitive):
     def flush(self):
         self._buffer.clear()
 
+    def close(self):
+        os.close(self._fd)
+
     def __repr__(self):
         return f"<fd: {self._fd}, buffer: {self._buffer}>"
 
