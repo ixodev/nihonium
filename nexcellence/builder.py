@@ -1,7 +1,4 @@
-import typing
-
-from opcodes import OpCode
-from instruction import *
+from .instruction import *
 
 
 def parse(bytecode: list[int]):

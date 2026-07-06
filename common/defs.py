@@ -4,7 +4,6 @@ import enum
 class OpCode(enum.IntEnum):
     PUSH = 0x00
     POP = 0x01
-    PEEK = 0x02
 
     ADD = 0x10
     SUB = 0x11
@@ -19,6 +18,8 @@ class OpCode(enum.IntEnum):
 
     PRINT = 0x40
     READ = 0x41
+    OPEN = 0x42
+    CLOSE = 0x43
 
     STORE = 0x50
     LOAD = 0x51
@@ -37,9 +38,36 @@ class OpCode(enum.IntEnum):
                 return 1
             case OpCode.MOV:
                 return 2
-            case OpCode.PRINT:
-                return 1
-            case OpCode.READ:
+            case OpCode.OPEN:
                 return 1
             case _:
                 return 0
+
+
+class FileMode(enum.IntEnum):
+    READ = 1
+    WRITE = 2
+    APP = 4
+    BIN = 8
+
+    @property
+    def mode_str(self):
+        match self:
+            case FileMode.READ:
+                return "r"
+            case FileMode.WRITE:
+                return "w"
+            case FileMode.APP:
+                return "a"
+            case FileMode.BIN:
+                return "b"
+            case _:
+                return ""
+
+
+class StreamType(enum.IntEnum):
+    STDIN = 0
+    STDOUT = 1
+    STDERR = 2
+    FILE = 3
+    SOCKET = 4

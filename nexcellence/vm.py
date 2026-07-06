@@ -1,11 +1,11 @@
 import typing
 
-from instruction import Instruction
-from frame import Locals, Stack, Registers
-from io_streams import IO
+from .instruction import Instruction
+from .frame import Locals, Stack, Registers
+from .io_streams import IO
 
 
-class VMRunner:
+class VM:
     def __init__(self, instructions: typing.List[Instruction]):
         self.instructions = instructions
 

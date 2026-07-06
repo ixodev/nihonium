@@ -1,14 +1,15 @@
 import typing
 
-from common_runtime.base_types import Object
-from opcodes import OpCode
-from frame import Locals, Stack, Registers
-from io_streams import IO
+from .io_streams import register_stream_type
+from nihonium.base_types import Object
+from common.defs import OpCode
+from .io_streams import IO
+from .frame import Locals, Stack, Registers
 
 
 INSTRUCTION_REGISTRY = {}
 
-def register(opcode):
+def register_instruction(opcode):
     def wrapper(cls):
         INSTRUCTION_REGISTRY[opcode] = cls
         return cls
@@ -34,7 +35,7 @@ class Instruction:
         return self._exec(locals, registers, stack, instr_ptr)
 
 
-@register(OpCode.PUSH)
+@register_instruction(OpCode.PUSH)
 class Push(Instruction):
     def __init__(self, operand: typing.Optional[Object]):
         super().__init__(OpCode.PUSH, operand)
@@ -44,7 +45,7 @@ class Push(Instruction):
         return InstructionResults(None)
 
 
-@register(OpCode.POP)
+@register_instruction(OpCode.POP)
 class Pop(Instruction):
     def __init__(self):
         super().__init__(OpCode.POP)
@@ -53,39 +54,62 @@ class Pop(Instruction):
         stack.pop()
         return InstructionResults(None)
 
-@register(OpCode.PEEK)
-class Peek(Instruction):
-    def __init__(self):
-        super().__init__(OpCode.PEEK)
-
-    def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
-        return InstructionResults
 
 
-@register(OpCode.PRINT)
+@register_instruction(OpCode.PRINT)
 class Print(Instruction):
-    def __init__(self, fd: int):
+    def __init__(self):
         super().__init__(OpCode.PRINT)
-        self.fd = fd
 
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
-        IO.write(self.fd, stack.peek())
-        stack.pop()
+
+        second_param = stack.pop()
+        first_param = stack.pop()
+
+        IO.write(first_param, second_param)
+
         return InstructionResults(None)
 
 
-@register(OpCode.READ)
+@register_instruction(OpCode.READ)
 class Read(Instruction):
-    def __init__(self, fd: int):
+    def __init__(self,):
         super().__init__(OpCode.READ)
-        self.fd = fd
 
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
-        stack.push(IO.read(self.fd))
+        stack.push(IO.read(stack.pop()))
+
         return InstructionResults(None)
 
 
-@register(OpCode.HALT)
+@register_instruction(OpCode.OPEN)
+class Open(Instruction):
+    def __init__(self, stream_type: int):
+        super().__init__(OpCode.OPEN)
+        self.stream_type = stream_type
+
+    def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
+
+        second_param = stack.pop()
+        first_param = stack.pop()
+
+        stack.push(IO.open_stream(self.stream_type, first_param, second_param))
+
+        return InstructionResults(None)
+
+
+@register_instruction(OpCode.CLOSE)
+class Close(Instruction):
+    def __init__(self):
+        super().__init__(OpCode.CLOSE)
+
+    def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
+        IO.close_stream(stack.pop())
+
+        return InstructionResults(None)
+
+
+@register_instruction(OpCode.HALT)
 class Halt(Instruction):
     def __init__(self):
         super().__init__(OpCode.HALT)
@@ -94,7 +118,7 @@ class Halt(Instruction):
         return InstructionResults(None, False)
 
 
-@register(OpCode.ADD)
+@register_instruction(OpCode.ADD)
 class Add(Instruction):
     def __init__(self):
         super().__init__(OpCode.ADD)
@@ -104,7 +128,7 @@ class Add(Instruction):
         return InstructionResults(None)
 
 
-@register(OpCode.SUB)
+@register_instruction(OpCode.SUB)
 class Sub(Instruction):
     def __init__(self):
         super().__init__(OpCode.SUB)
@@ -114,7 +138,7 @@ class Sub(Instruction):
         return InstructionResults(None)
 
 
-@register(OpCode.MUL)
+@register_instruction(OpCode.MUL)
 class Mul(Instruction):
     def __init__(self):
         super().__init__(OpCode.MUL)
@@ -124,7 +148,7 @@ class Mul(Instruction):
         return InstructionResults(None)
 
 
-@register(OpCode.DIV)
+@register_instruction(OpCode.DIV)
 class Div(Instruction):
     def __init__(self):
         super().__init__(OpCode.DIV)
@@ -134,7 +158,7 @@ class Div(Instruction):
         return InstructionResults(None)
 
 
-@register(OpCode.LOAD)
+@register_instruction(OpCode.LOAD)
 class Load(Instruction):
     def __init__(self, address: int):
         super().__init__(OpCode.LOAD)
@@ -145,7 +169,7 @@ class Load(Instruction):
         return InstructionResults(None)
 
 
-@register(OpCode.STORE)
+@register_instruction(OpCode.STORE)
 class Store(Instruction):
     def __init__(self, address):
         super().__init__(OpCode.STORE)
@@ -157,7 +181,7 @@ class Store(Instruction):
         return InstructionResults(None)
 
 
-@register(OpCode.MOV)
+@register_instruction(OpCode.MOV)
 class Mov(Instruction):
     def __init__(self, src: int, dst: int):
         super().__init__(OpCode.MOV)

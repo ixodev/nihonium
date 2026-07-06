@@ -1,8 +1,9 @@
 import typing
-import enum
 
-from common_runtime.base_types import InputStream, OutputStream, IOStream
-from frame import Locals
+from nihonium.base_types import InputStream, OutputStream, IOStream
+from nexcellence.frame import Locals
+
+from common import FileMode, StreamType
 
 import sys
 import heapq
@@ -14,22 +15,22 @@ import heapq
 
 STREAM_TYPE_REGISTRY = {}
 
-def register_type(name: str):
+def register_stream_type(stream_type: int):
     def decorator(cls: type):
-        STREAM_TYPE_REGISTRY[name] = cls
+        STREAM_TYPE_REGISTRY[stream_type] = cls
         return cls
     return decorator
 
 
-def create_stream(name: str, *args, **kwargs):
+def create_stream(stream_type: int, *args, **kwargs):
     try:
-        cls = STREAM_TYPE_REGISTRY[name]
+        cls = STREAM_TYPE_REGISTRY[stream_type]
     except KeyError:
-        raise ValueError(f"Unknown stream type: {name}")
+        raise ValueError(f"Unknown stream type: {stream_type}")
     return cls(*args, **kwargs)
 
 
-@register_type("stdin")
+@register_stream_type(StreamType.STDIN)
 class StdIn(InputStream):
 
     __is_open = False
@@ -43,7 +44,7 @@ class StdIn(InputStream):
         print("stdin already open")
 
 
-@register_type("stdout")
+@register_stream_type(StreamType.STDOUT)
 class StdOut(OutputStream):
 
     __is_open = False
@@ -57,7 +58,7 @@ class StdOut(OutputStream):
         print("stdout already open")
 
 
-@register_type("stderr")
+@register_stream_type(StreamType.STDERR)
 class StdErr(OutputStream):
 
     __is_open = False
@@ -71,51 +72,34 @@ class StdErr(OutputStream):
         print("stderr already open")
 
 
-class StreamType(enum.IntEnum):
-    READ = 1
-    WRITE = 2
-    APP = 4
-    BIN = 8
-
-    @property
-    def mode_str(self):
-        match self:
-            case StreamType.READ:
-                return "r"
-            case StreamType.WRITE:
-                return "w"
-            case StreamType.APP:
-                return "a"
-            case StreamType.BIN:
-                return "b"
-            case _:
-                return ""
-
-
-@register_type("filesystem")
+@register_stream_type(StreamType.FILE)
 class FileSystemStream(InputStream, OutputStream):
 
-    def __init__(self, file: str, mode: StreamType):
+    def __init__(self, file: str, mode: FileMode):
         self.mode = mode
         self.mode_str = ""
 
         if mode.mode_str == "":
 
-            if mode & StreamType.READ:
-                self.mode_str += StreamType.READ.mode_str
-            if mode & StreamType.WRITE:
-                self.mode_str += StreamType.WRITE.mode_str
-            if mode & StreamType.APP:
-                self.mode_str += StreamType.APP.mode_str
-            if mode & StreamType.BIN:
-                self.mode_str += StreamType.BIN.mode_str
+            if mode & FileMode.READ:
+                self.mode_str += FileMode.READ.mode_str
+            if mode & FileMode.WRITE:
+                self.mode_str += FileMode.WRITE.mode_str
+            if mode & FileMode.APP:
+                self.mode_str += FileMode.APP.mode_str
+            if mode & FileMode.BIN:
+                self.mode_str += FileMode.BIN.mode_str
 
         else:
             self.mode_str = self.mode.mode_str
 
-        fd = open(file, self.mode_str).fileno()
+        self.file_handle = open(str(file), str(self.mode_str))
+        fd = self.file_handle.fileno()
 
         IOStream.__init__(self, fd)
+
+    def close(self):
+        self.file_handle.close()
 
 
 
@@ -177,8 +161,8 @@ class IO:
     # -----------------------------------------------------
 
     @staticmethod
-    def open_stream(type_name: str, *args, **kwargs) -> int:
-        stream = create_stream(type_name, *args, **kwargs)
+    def open_stream(stream_type: int, *args, **kwargs) -> int:
+        stream = create_stream(stream_type, *args, **kwargs)
 
         fd = IO.allocate_fd()
         IO.streams.store(fd, stream)
@@ -206,6 +190,6 @@ class IO:
     @staticmethod
     def read(fd: int, n: int = -1):
         stream = IO.streams.load(fd)
-        stream.read()
 
+        stream.read()
         return stream.read_buffer(n).decode()
