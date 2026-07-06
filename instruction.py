@@ -61,6 +61,7 @@ class Peek(Instruction):
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
         return InstructionResults
 
+
 @register(OpCode.PRINT)
 class Print(Instruction):
     def __init__(self, fd: int):
@@ -72,6 +73,7 @@ class Print(Instruction):
         stack.pop()
         return InstructionResults(None)
 
+
 @register(OpCode.READ)
 class Read(Instruction):
     def __init__(self, fd: int):
@@ -82,6 +84,7 @@ class Read(Instruction):
         stack.push(IO.read(self.fd))
         return InstructionResults(None)
 
+
 @register(OpCode.HALT)
 class Halt(Instruction):
     def __init__(self):
@@ -89,6 +92,7 @@ class Halt(Instruction):
 
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
         return InstructionResults(None, False)
+
 
 @register(OpCode.ADD)
 class Add(Instruction):
@@ -163,5 +167,4 @@ class Mov(Instruction):
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
         registers.mov(self.src, self.dst)
         return InstructionResults(None)
-
 

@@ -1,6 +1,7 @@
 import typing
+import enum
 
-from common_runtime.base_types import InputStream, OutputStream
+from common_runtime.base_types import InputStream, OutputStream, IOStream
 from frame import Locals
 
 import sys
@@ -37,6 +38,9 @@ class StdIn(InputStream):
         if not StdIn.__is_open:
             super().__init__(sys.stdin.fileno())
             StdIn.__is_open = True
+            return
+
+        print("stdin already open")
 
 
 @register_type("stdout")
@@ -48,6 +52,9 @@ class StdOut(OutputStream):
         if not StdOut.__is_open:
             super().__init__(sys.stdout.fileno())
             StdOut.__is_open = True
+            return
+
+        print("stdout already open")
 
 
 @register_type("stderr")
@@ -59,6 +66,57 @@ class StdErr(OutputStream):
         if not StdErr.__is_open:
             super().__init__(sys.stderr.fileno())
             StdErr.__is_open = True
+            return
+
+        print("stderr already open")
+
+
+class StreamType(enum.IntEnum):
+    READ = 1
+    WRITE = 2
+    APP = 4
+    BIN = 8
+
+    @property
+    def mode_str(self):
+        match self:
+            case StreamType.READ:
+                return "r"
+            case StreamType.WRITE:
+                return "w"
+            case StreamType.APP:
+                return "a"
+            case StreamType.BIN:
+                return "b"
+            case _:
+                return ""
+
+
+@register_type("filesystem")
+class FileSystemStream(InputStream, OutputStream):
+
+    def __init__(self, file: str, mode: StreamType):
+        self.mode = mode
+        self.mode_str = ""
+
+        if mode.mode_str == "":
+
+            if mode & StreamType.READ:
+                self.mode_str += StreamType.READ.mode_str
+            if mode & StreamType.WRITE:
+                self.mode_str += StreamType.WRITE.mode_str
+            if mode & StreamType.APP:
+                self.mode_str += StreamType.APP.mode_str
+            if mode & StreamType.BIN:
+                self.mode_str += StreamType.BIN.mode_str
+
+        else:
+            self.mode_str = self.mode.mode_str
+
+        fd = open(file, self.mode_str).fileno()
+
+        IOStream.__init__(self, fd)
+
 
 
 # =========================================================
@@ -126,7 +184,6 @@ class IO:
         IO.streams.store(fd, stream)
 
         return fd
-
 
     # -----------------------------------------------------
     # CLOSE STREAM

@@ -25,7 +25,7 @@ class OpCode(enum.IntEnum):
     MOV = 0x52
 
     @property
-    def stride(self) -> int:
+    def stride(self):
         match self:
             case OpCode.PUSH:
                 return 1
