@@ -40,6 +40,14 @@ class OpCode(enum.IntEnum):
                 return 2
             case OpCode.OPEN:
                 return 1
+            case OpCode.PRINT:
+                return 1
+            case OpCode.READ:
+                return 1
+            case OpCode.OPEN:
+                return 3
+            case OpCode.CLOSE:
+                return 1
             case _:
                 return 0
 

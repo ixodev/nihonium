@@ -16,16 +16,10 @@ bytecode = [
 ]
 
 bytecode2 = [
-    nexcellence.OpCode.PUSH, nihonium.String("test.txt"),
-    nexcellence.OpCode.PUSH, common.FileMode.READ,
-    nexcellence.OpCode.OPEN, common.StreamType.FILE,
-    nexcellence.OpCode.STORE, 43,
-    nexcellence.OpCode.PUSH, 1,
+    nexcellence.OpCode.OPEN, common.StreamType.FILE, "test.txt", common.FileMode.WRITE,
+    nexcellence.OpCode.READ, 3,
 
-    nexcellence.OpCode.LOAD, 43,
-    nexcellence.OpCode.READ,
-
-    nexcellence.OpCode.PRINT
+    nexcellence.OpCode.PRINT, 1
 ]
 
 vm = nexcellence.VM(nexcellence.parse(bytecode2))

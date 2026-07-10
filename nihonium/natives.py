@@ -8,26 +8,53 @@ from .error import *
 from .export_native import *
 from .base_types import *
 
+@export_symbol(allowed_modules=["stdlib.stdio"], nihonium_name="stdin")
+class StdIn(InputStream):
 
-@export_symbol(allowed_modules=["stdlib.stdio"])
-def createOutputStream(fd: int):
-    return OutputStream(fd)
+    __is_open = False
 
-@export_symbol(allowed_modules=["stdlib.stdio"])
-def createInputStream(fd: int):
-    return InputStream(fd)
+    def __init__(self):
+        if not StdIn.__is_open:
+            super().__init__(sys.stdin.fileno())
+            StdIn.__is_open = True
+            return
 
-@export_symbol(allowed_modules=["stdlib.stdio"])
-def standardOutputFileno():
-    return sys.stdout.fileno()
+        print("stdin already open")
 
-@export_symbol(allowed_modules=["stdlib.stdio"])
-def standardInputFileno():
-    return sys.stdin.fileno()
+@export_symbol(allowed_modules=["stdlib.stdio"], nihonium_name="stdout")
+class StdOut(OutputStream):
 
-@export_symbol(allowed_modules=["stdlib.stdio"])
-def standardErrorFileno():
-    return sys.stderr.fileno()
+    __is_open = False
+
+    def __init__(self):
+        if not StdOut.__is_open:
+            super().__init__(sys.stdout.fileno())
+            StdOut.__is_open = True
+            return
+
+        print("stdout already open")
+
+@export_symbol(allowed_modules=["stdlib.stdio"], nihonium_name="stderr")
+class StdErr(OutputStream):
+
+    __is_open = False
+
+    def __init__(self):
+        if not StdErr.__is_open:
+            super().__init__(sys.stderr.fileno())
+            StdErr.__is_open = True
+            return
+
+        print("stderr already open")
+
+
+@export_symbol(allowed_modules="stdlib.stdio", nihonium_name="open")
+def open_file(file_name: str, file_mode: int):
+    return FileSystemStream(file_name, FileMode(file_mode))
+
+@export_symbol(allowed_modules="stdlib.stdio")
+def close(stream: IOStream):
+    stream.close()
 
 
 @export_symbol(allowed_modules=["stdlib.math"], nihonium_name="abs")

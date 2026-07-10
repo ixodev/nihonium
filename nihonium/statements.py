@@ -62,6 +62,19 @@ class FunctionDeclaration(Statement):
         return None, False
 
 
+class ClassDeclaration(Statement):
+    def __init__(self, line_str: str, class_name: str, start: int, end: int):
+        super().__init__(line_str)
+
+        self.class_name = class_name
+        self.start = start
+        self.end = end
+
+    def exec(self, program, scope_variables):
+        for attr in self.attrs:
+            attr.exec(program, scope_variables)
+
+
 class VarDeclaration(Statement):
     def __init__(self, line_str: str, name: str, expression: Expression, parent=None):
         super().__init__(line_str, parent)

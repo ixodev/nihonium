@@ -2,9 +2,11 @@ import typing
 import os
 import itertools
 import math
-from typing import Optional
+from typing import Optional, Dict, Any, List
+import enum
 
 from .error import error
+from .symbol_table import SymbolTable
 
 
 class _PrimitiveTypesMappingRegistry:
@@ -56,8 +58,9 @@ class Object:
 
     _id_counter = itertools.count()
 
-    def __init__(self):
+    def __init__(self, fields: Optional[SymbolTable] = None):
         self._id = next(self._id_counter)
+        self.local_fields = fields
 
     def reference_equals(self, other):
         return Bool(other.get_id() == self._id)
@@ -85,6 +88,12 @@ class Object:
 
     def is_lambda_function(self):
         return type(self).__name__ == "LambdaFunction"
+
+    def call_method(self, program, scope_variables, method: str, parameters: List[Any]):
+        return program.call_object(self.local_fields[method], parameters, scope_variables)
+
+    def get_attr(self, attr: str):
+        return self.local_fields[attr]
 
 
 class Primitive(Object):
@@ -735,7 +744,6 @@ class String(Object):
         return hash(self.value)
 
 
-
 class IOStream(NoPrimitive):
     def __init__(self, fd: int):
         super().__init__()
@@ -814,6 +822,48 @@ class InputStream(IOStream):
 
     def __repr__(self):
         return "input " + super().__repr__()
+
+
+class FileMode(enum.IntFlag):
+    READ = 1
+    WRITE = 2
+    APPEND = 4
+    BINARY = 8
+
+
+    @property
+    def mode_str(self):
+        modes = self & (FileMode.READ | FileMode.WRITE | FileMode.APPEND)
+
+        mapping = {
+            FileMode.READ: "r",
+            FileMode.WRITE: "w",
+            FileMode.APPEND: "a",
+        }
+
+        try:
+            mode = mapping[modes]
+        except KeyError:
+            raise ValueError(f"Invalid file mode : {self}")
+
+        if self & FileMode.BINARY:
+            mode += "b"
+
+        return mode
+
+
+class FileSystemStream(InputStream, OutputStream):
+
+    def __init__(self, file: str, mode: int | FileMode):
+        self.mode = FileMode(mode)
+        self.mode_str = self.mode.mode_str
+
+        self.file_handle = open(file, self.mode_str)
+
+        IOStream.__init__(self, self.file_handle.fileno())
+
+    def close(self):
+        self.file_handle.close()
 
 
 @map_primitive_type_to(list)

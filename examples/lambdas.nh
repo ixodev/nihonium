@@ -25,4 +25,8 @@ function main(args) {
     println(pow(-2, 2 * im + 2))
 
     println(complex(32, 32))
+
+    var file = open("uiltes.txt", FILE_APP | FILE_BIN)
+    printfln(file, 2 * im + 2)
+    close(file)
 }

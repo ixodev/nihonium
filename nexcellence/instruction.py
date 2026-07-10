@@ -58,53 +58,52 @@ class Pop(Instruction):
 
 @register_instruction(OpCode.PRINT)
 class Print(Instruction):
-    def __init__(self):
+    def __init__(self, fd: int):
         super().__init__(OpCode.PRINT)
+        self.fd = fd
 
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
 
-        second_param = stack.pop()
-        first_param = stack.pop()
-
-        IO.write(first_param, second_param)
+        IO.write(self.fd, stack.pop())
 
         return InstructionResults(None)
 
 
 @register_instruction(OpCode.READ)
 class Read(Instruction):
-    def __init__(self,):
+    def __init__(self, fd: int):
         super().__init__(OpCode.READ)
+        self.fd = fd
 
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
-        stack.push(IO.read(stack.pop()))
+        stack.push(IO.read(self.fd))
 
         return InstructionResults(None)
 
 
 @register_instruction(OpCode.OPEN)
 class Open(Instruction):
-    def __init__(self, stream_type: int):
+    def __init__(self, stream_type: int, param1: typing.Any, param2: typing.Any):
         super().__init__(OpCode.OPEN)
         self.stream_type = stream_type
+        self.param1 = param1
+        self.param2 = param2
 
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
 
-        second_param = stack.pop()
-        first_param = stack.pop()
-
-        stack.push(IO.open_stream(self.stream_type, first_param, second_param))
+        stack.push(IO.open_stream(self.stream_type, self.param1, self.param2))
 
         return InstructionResults(None)
 
 
 @register_instruction(OpCode.CLOSE)
 class Close(Instruction):
-    def __init__(self):
+    def __init__(self, fd: int):
         super().__init__(OpCode.CLOSE)
+        self.fd = fd
 
     def _exec(self, locals: Locals, registers: Registers, stack: Stack, instr_ptr: int):
-        IO.close_stream(stack.pop())
+        IO.close_stream(self.fd)
 
         return InstructionResults(None)
 

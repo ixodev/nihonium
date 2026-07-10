@@ -1,20 +1,33 @@
 // This file is part of the Nihonium standard library
 // Copyright (c) ixodev
 
-var _stdout_ = native createOutputStream(native standardOutputFileno())
-var _stdin_ = native createInputStream(native standardInputFileno())
-var _stderr_ = native createOutputStream(native standardErrorFileno())
+var stdout = native stdout()
+var stdin = native stdin()
+var stderr = native stderr()
 
+var FILE_READ = 1
+var FILE_WRITE = 2
+var FILE_APP = 4
+var FILE_BIN = 8
+
+
+function open(file, mode) {
+    return native open(file, mode)
+}
+
+function close(file) {
+    native close(file)
+}
 
 function print(value) {
-    write _stdout_, value
-    flush _stdout_
+    write stdout, value
+    flush stdout
 }
 
 function println(value) {
-    write _stdout_, value
-    write _stdout_, "\n"
-    flush _stdout_
+    write stdout, value
+    write stdout, "\n"
+    flush stdout
 }
 
 function printf(file, value) {
@@ -29,7 +42,7 @@ function printfln(file, value) {
 }
 
 function printn(value) {
-    write _stdout_, value
+    write stdout, value
 }
 
 function printnf(file, value) {
@@ -37,7 +50,7 @@ function printnf(file, value) {
 }
 
 function readln() {
-    return read _stdin_
+    return read stdin
 }
 
 function readfln(file) {
