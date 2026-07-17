@@ -4,6 +4,7 @@ import math
 import cmath
 import time
 from typing import *
+
 from .error import *
 from .export_native import *
 from .base_types import *
@@ -14,12 +15,10 @@ class StdIn(InputStream):
     __is_open = False
 
     def __init__(self):
-        if not StdIn.__is_open:
-            super().__init__(sys.stdin.fileno())
-            StdIn.__is_open = True
-            return
 
-        print("stdin already open")
+        #if not StdIn.__is_open:
+        super().__init__(sys.stdin.fileno())
+
 
 @export_symbol(allowed_modules=["stdlib.stdio"], nihonium_name="stdout")
 class StdOut(OutputStream):
@@ -27,12 +26,7 @@ class StdOut(OutputStream):
     __is_open = False
 
     def __init__(self):
-        if not StdOut.__is_open:
-            super().__init__(sys.stdout.fileno())
-            StdOut.__is_open = True
-            return
-
-        print("stdout already open")
+        super().__init__(sys.stdout.fileno())
 
 @export_symbol(allowed_modules=["stdlib.stdio"], nihonium_name="stderr")
 class StdErr(OutputStream):
@@ -40,12 +34,7 @@ class StdErr(OutputStream):
     __is_open = False
 
     def __init__(self):
-        if not StdErr.__is_open:
-            super().__init__(sys.stderr.fileno())
-            StdErr.__is_open = True
-            return
-
-        print("stderr already open")
+        super().__init__(sys.stderr.fileno())
 
 
 @export_symbol(allowed_modules="stdlib.stdio", nihonium_name="open")

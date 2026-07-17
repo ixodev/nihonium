@@ -1,19 +1,21 @@
 from typing import List, Optional
 
 from .base_types import Object, CallableObject
-from .function import Function
 from .symbol_table import SymbolTable
 
 
 class Class(CallableObject):
-    def __init__(self, name: str, attrs: SymbolTable, ctor_params: Optional[List[Object]] = None):
+    def __init__(self, name: str, attrs: SymbolTable):
         super().__init__()
 
         self.name = name
         self.attrs = attrs
-        self.ctor_params = ctor_params
 
         self.ctor = self.search_ctor()
+        self.ctor_params = None
+
+        if self.has_ctor():
+            self.ctor_params = self.attrs[self.name].parameters
 
     def has_ctor(self):
         return self.ctor is not None

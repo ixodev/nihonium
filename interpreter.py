@@ -28,7 +28,7 @@ class Interpreter:
     def run_program(self):
         self.module.run()
 
-        if not self.module.has_function(nihonium.MAIN_FUNCTION):
+        if not self.module.has_function(nihonium.MAIN_FUNCTION, safe=True):
             return 0
 
         return self.module.call_function(nihonium.MAIN_FUNCTION, [[]], nihonium.SymbolTable({})).convert_python()

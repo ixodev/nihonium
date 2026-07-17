@@ -4,6 +4,7 @@ from .patterns import *
 from .statements import *
 from .expressions import *
 from .function import *
+from .class_obj import *
 from .config import RunConfig
 
 
@@ -14,48 +15,9 @@ class Parser:
         self.lines_str = lines_str
 
     def parse(self, module_name: str, args: RunConfig):
-        function_declarations = []
 
-        global_statements = []
-        i = 0
-
-        while i < len(self.lines):
-            line = self.lines[i]
-            line_str = self.lines_str[i]
-
-            if StatementPatternRecognizer.is_function_definition(line):
-                name, parameters, ending = StatementPatternRecognizer.extract_function(line, self.lines)
-
-                declaration = FunctionDeclaration(None, line_str, name, parameters, i, ending)
-
-                function_declarations.append(declaration)
-
-                i = ending + 1
-
-            else:
-
-                if StatementPatternRecognizer.is_import_statement(line):
-                    global_statements.append(ImportStatement(line_str, StatementPatternRecognizer.extract_import_statement(line)))
-                elif StatementPatternRecognizer.is_variable_declaration(line):
-                    name, value = StatementPatternRecognizer.extract_variable(line)
-                    global_statements.append(VarDeclaration(line_str, name, Parser.parse_expression(value, line_str)))
-                else:
-                    global_statements.append(UnknownStatement(line_str))
-
-                i += 1
-
-        for function_declaration in function_declarations:
-            start = function_declaration.function_start
-            ending = function_declaration.function_end
-
-            body = self.parse_block(start + 1, ending - 1)
-
-            function_declaration.function = Function(function_declaration.function_name, function_declaration.function_parameters, body)
-
-            function_declaration.gen_decl()
-
-            global_statements.insert(0, function_declaration)
-
+        global_statements = self.parse_block(0, len(self.lines) - 1)
+        #print(global_statements)
         return Program(global_statements, module_name, args)
 
 
@@ -139,7 +101,24 @@ class Parser:
 
     def parse_statement(self, line: List[Token], line_str: str, n_line: int):
 
-        if StatementPatternRecognizer.is_variable_declaration(line):
+        if StatementPatternRecognizer.is_function_definition(line):
+            name, parameters, ending = StatementPatternRecognizer.extract_function(line, self.lines)
+
+            declaration = FunctionDeclaration(Function(name,
+                                                       parameters, self.parse_block(n_line + 1, ending - 1)), line_str, name,
+                                              parameters, n_line, ending)
+
+            return declaration, ending
+
+        elif StatementPatternRecognizer.is_class_declaration(line):
+            name, body, ending = StatementPatternRecognizer.extract_class(line, self.lines, n_line)
+
+            return ClassDeclaration(line_str, name, self.parse_block(n_line + 1, ending - 1), n_line, ending), ending
+
+        elif StatementPatternRecognizer.is_import_statement(line):
+            return ImportStatement(line_str, StatementPatternRecognizer.extract_import_statement(line)), n_line
+
+        elif StatementPatternRecognizer.is_variable_declaration(line):
             name, expression = StatementPatternRecognizer.extract_variable(line)
             return VarDeclaration(line_str, name, Parser.parse_expression(expression, line_str)), n_line
 
@@ -191,19 +170,19 @@ class Parser:
                 return UnsafeStatement(line_str, self.parse_block(n_line + 1, unsafe_statement_end - 1)), unsafe_statement_end
 
         elif StatementPatternRecognizer.is_if_statement(line):
-            condition, if_statement_end = StatementPatternRecognizer.extract_conditional_statement(self.lines, n_line)
+            condition, if_statement_end = StatementPatternRecognizer.extract_block(self.lines, n_line)
             if if_statement_end != -1:
                 return IfStatement(line_str, self.parse_block(n_line + 1, if_statement_end - 1), Parser.parse_expression(condition, line_str)), if_statement_end
 
         elif StatementPatternRecognizer.is_while_statement(line):
-            condition, while_statement_end = StatementPatternRecognizer.extract_conditional_statement(self.lines,
+            condition, while_statement_end = StatementPatternRecognizer.extract_block(self.lines,
                                                                                                       n_line)
             if while_statement_end != -1:
                 return WhileLoopStatement(line_str, self.parse_block(n_line + 1, while_statement_end - 1),
                                                      Parser.parse_expression(condition, line_str)), while_statement_end
 
         elif StatementPatternRecognizer.is_for_statement(line):
-            for_statement_end = StatementPatternRecognizer.extract_conditional_statement(self.lines, n_line)[1]
+            for_statement_end = StatementPatternRecognizer.extract_block(self.lines, n_line)[1]
             initialization, condition, change = StatementPatternRecognizer.extract_for_statement(line)
 
             if for_statement_end != - 1:

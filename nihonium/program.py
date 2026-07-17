@@ -60,8 +60,7 @@ class Program:
     def get_function(self, name: str, safe: bool=False):
 
         if safe:
-            obj = self.global_variables.safe_getitem(name)
-            return obj
+            return self.global_variables.safe_getitem(name)
 
         else:
             obj = self.global_variables[name]
@@ -85,17 +84,13 @@ class Program:
 
     def process_global_statements(self):
         self.global_variables.clear()
+        self.inner_global_variables.clear()
 
-        for statement in list(filter(lambda statement: type(statement) is not ImportStatement, self.global_statements)):
-            statement(self, self.global_variables)
-
-        self.inner_global_variables = self.global_variables
-
-        for statement in list(filter(lambda statement: type(statement) is ImportStatement, self.global_statements)):
+        for statement in self.global_statements:
             statement(self, self.global_variables)
 
 
-        #rint("------- MODULE ", self.module_name, " ------")
+        #print("------- MODULE ", self.module_name, " ------")
         #print(self.global_variables)
         #print("-------------------------------------\n\n")
 

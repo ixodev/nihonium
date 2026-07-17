@@ -6,7 +6,7 @@ from .defs import *
 
 
 class Function(CallableObject):
-    def __init__(self, name: str, parameters, body: list):
+    def __init__(self, name: str, parameters, body: List[Statement]):
         super().__init__()
 
         self.name = name

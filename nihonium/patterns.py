@@ -310,7 +310,7 @@ class StatementPatternRecognizer:
         return end
 
     @staticmethod
-    def extract_conditional_statement(lines: List[List[Token]], n_line: int):
+    def extract_block(lines: List[List[Token]], n_line: int):
         return lines[n_line][1:-1], StatementPatternRecognizer.extract_scope(lines, n_line)
 
     @staticmethod
@@ -384,6 +384,21 @@ class StatementPatternRecognizer:
     @staticmethod
     def extract_native_function_call(expression: List[Token]):
         return ExpressionPatternRecognizer.extract_native_function_call(expression)
+
+    @staticmethod
+    def is_class_declaration(line: List[Token]):
+        if len(line) >= 3:
+            if line[0].is_type(TOKEN_TYPE_CLASS):
+                if line[-1].is_type(TOKEN_TYPE_LBRACE):
+                    if line[1].is_type(TOKEN_TYPE_IDENT):
+                        return True
+
+        return False
+
+    @staticmethod
+    def extract_class(line: List[Token], lines: List[List[Token]], n_line: int):
+        t = StatementPatternRecognizer.extract_block(lines, n_line)
+        return line[1].get_value(), t[0], t[1]
 
 
 class ExpressionPatternRecognizer:

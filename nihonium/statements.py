@@ -1,6 +1,8 @@
 import sys
 from typing import List, Optional
 
+from . import SymbolTable
+from .class_obj import Class
 from .element import *
 from .error import *
 from .expressions import Expression, ParsedExpression
@@ -52,27 +54,31 @@ class FunctionDeclaration(Statement):
         self.function_parameters = parameters
         self.function_start = start
         self.function_end = end
-        self.decl = None
-
-    def gen_decl(self):
-        self.decl = VarDeclaration("", self.function_name, ParsedExpression("", self.function))
+        self.declaration = VarDeclaration("", self.function_name, ParsedExpression("", self.function))
 
     def exec(self, program, scope_variables):
-        self.decl(program, scope_variables)
+        self.declaration(program, scope_variables)
         return None, False
 
 
 class ClassDeclaration(Statement):
-    def __init__(self, line_str: str, class_name: str, start: int, end: int):
+    def __init__(self, line_str: str, class_name: str, body: List[Statement], start: int, end: int):
         super().__init__(line_str)
 
         self.class_name = class_name
+        self.body = body
         self.start = start
         self.end = end
 
     def exec(self, program, scope_variables):
-        for attr in self.attrs:
-            attr.exec(program, scope_variables)
+        class_scope = SymbolTable()
+
+        for statement in self.body:
+            statement(program, class_scope)
+
+        VarDeclaration("", self.class_name, ParsedExpression("", Class(self.class_name, class_scope))).exec(program, scope_variables)
+
+        return None, False
 
 
 class VarDeclaration(Statement):

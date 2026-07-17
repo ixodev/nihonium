@@ -22,8 +22,8 @@ class Module:
     def get_function(self, name: str):
         return self.program.get_function(name)
 
-    def has_function(self, name: str):
-        return self.program.has_function(name)
+    def has_function(self, name: str, safe: bool=False):
+        return self.program.has_function(name, safe=safe)
 
     def has_native_function(self, name: str, client_module_name: str):
         return self.program.has_native_function(name, client_module_name)
