@@ -17,7 +17,6 @@ class Parser:
     def parse(self, module_name: str, args: RunConfig):
 
         global_statements = self.parse_block(0, len(self.lines) - 1)
-        #print(global_statements)
         return Program(global_statements, module_name, args)
 
 
