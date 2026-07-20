@@ -1,5 +1,6 @@
 from .parser import *
 from .program_reader import *
+from .program import *
 from .config import RunConfig
 
 
@@ -8,7 +9,7 @@ class Module:
         self.args = args
         self.module_name = module_name
         self.program_reader = ProgramReader(module_name)
-        self.program = Parser(self.program_reader.get_lines_as_tokens(), self.program_reader.get_lines()).parse(self.module_name, self.args)
+        self.program = Program(Parser(self.program_reader.get_lines_as_tokens(), self.program_reader.get_lines()).parse(), self.module_name, self.args)
 
     def get_program(self):
         return self.program

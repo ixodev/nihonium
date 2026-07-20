@@ -1,11 +1,9 @@
 import argparse
-from .program import *
 from .patterns import *
 from .statements import *
 from .expressions import *
 from .function import *
 from .class_obj import *
-from .config import RunConfig
 
 
 class Parser:
@@ -14,11 +12,10 @@ class Parser:
         self.lines = lines
         self.lines_str = lines_str
 
-    def parse(self, module_name: str, args: RunConfig):
+    def parse(self):
 
         global_statements = self.parse_block(0, len(self.lines) - 1)
-        return Program(global_statements, module_name, args)
-
+        return global_statements
 
     @staticmethod
     def parse_operator_expression(expression: List[Token], line_str: str):

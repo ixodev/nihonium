@@ -35,7 +35,7 @@ class InlineExecutor:
     def __init__(self, program: str, args: RunConfig):
         self.program = ProgramCleaner(program).minified_program
         self.args = args
-        self.context = Parser(Lexer(self.program).tokenize(), self.program).parse("", args)
+        self.context = Program(Parser(Lexer(self.program).tokenize(), self.program).parse(), "", args)
 
     def exec_inline(self):
         self.context.process_global_statements()
