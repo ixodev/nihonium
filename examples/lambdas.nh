@@ -21,7 +21,7 @@ function main(args) {
     //println(exp(complex(0, pi)))
     //println(pow(2, 2 * im))
     println(pow(-2, 2 * im + 2))
-
+    println(s(423423))
     println(complex(32, 32))
 
     var file = open("uiltes.txt", FILE_APP | FILE_BIN)
@@ -36,7 +36,7 @@ function main(args) {
     }
 
     println(q(43532543))
-
+    println(readln())
 }
 
 

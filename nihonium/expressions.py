@@ -1,9 +1,7 @@
-import typing
+from typing import Union
 from .element import *
-from .patterns import *
 from .operators import *
 from .error import *
-from .lexer import *
 from .base_types import *
 
 
@@ -28,41 +26,45 @@ class Expression(Element):
 
 
 class Atomic(Expression):
-    def __init__(self, line_str: str, expression: typing.List[Token]):
+    def __init__(self, line_str: str, value: Union[int, float, str, bool]):
         super().__init__(line_str)
-        self.expression = expression
+        self.value = value
 
     def get_extracted_expression(self):
-        return self.expression[0].get_value()
+        return self.value
 
-class BooleanAtomicExpression(Atomic):
-    def __init__(self, line_str: str, expression: typing.List[Token]):
-        super().__init__(line_str, expression)
+class Literal(Atomic):
+    def __init__(self, line_str: str, literal: Union[int, float, str, bool]):
+        super().__init__(line_str, literal)
+        self.literal = literal
+
+    def get_extracted_expression(self):
+        return self.literal
+
+class BooleanExpression(Literal):
+    def __init__(self, line_str: str, literal: bool):
+        super().__init__(line_str, literal)
 
     def eval(self, program, scope_variables):
-        return Bool(self.expression[0].is_type(TOKEN_TYPE_TRUE))
+        return Bool(self.literal)
 
 class VariableExpression(Atomic):
-    def __init__(self, line_str: str, expression: typing.List[Token]):
-        super().__init__(line_str, expression)
+    def __init__(self, line_str: str, name: str):
+        super().__init__(line_str, name)
 
     def eval(self, program, scope_variables):
-        extracted_expression = self.get_extracted_expression()
 
-        if not extracted_expression in scope_variables:
-            error(f"variable {extracted_expression} not declared")
+        if not self.value in scope_variables:
+            error(f"variable {self.value} not declared")
 
-        return scope_variables[extracted_expression]
+        return scope_variables[self.value]
 
 class FunctionCallExpression(Expression):
-    def __init__(self, line_str: str, expression: typing.List[Token]):
+    def __init__(self, line_str: str, name: str, parameters: List[Expression]):
         super().__init__(line_str)
-        self.expression = expression
 
-        from .parser import Parser
-
-        self.name, unparsed_parameters = ExpressionPatternRecognizer.extract_function_call(self.expression)
-        self.parameters = [Parser.parse_expression(parameter, self.line_str) for parameter in unparsed_parameters]
+        self.name = name
+        self.parameters = parameters
 
     def eval(self, program, scope_variables):
         return program.call_object_by_name(self.name,
@@ -70,8 +72,8 @@ class FunctionCallExpression(Expression):
 
 
 class NativeFunctionCallExpression(FunctionCallExpression):
-    def __init__(self, line_str: str, expression: typing.List[Token]):
-        super().__init__(line_str, expression)
+    def __init__(self, line_str: str, name: str, parameters: List[Expression]):
+        super().__init__(line_str, name, parameters)
 
     def eval(self, program, scope_variables):
         return program.call_native_function(self.name, [parameter(program, scope_variables) for parameter in self.parameters])
@@ -90,24 +92,23 @@ class DirectCallExpression(Expression):
 
         return program.call_object(self.obj, evaluated_args, scope_variables)
 
-class StringExpression(Atomic):
-    def __init__(self, line_str: str, expression: typing.List[Token]):
-        super().__init__(line_str, expression)
+class StringExpression(Literal):
+    def __init__(self, line_str: str, literal: str):
+        super().__init__(line_str, literal)
 
     def eval(self, program, scope_variables):
-        return String(self.get_extracted_expression()[1:-1])
+        return String(self.literal[1:-1])
 
-class NumberExpression(Atomic):
-    def __init__(self, line_str: str, expression: typing.List[Token]):
-        super().__init__(line_str, expression)
+class NumberExpression(Literal):
+    def __init__(self, line_str: str, literal: Union[int, float]):
+        super().__init__(line_str, literal)
 
     def eval(self, program, scope_variables):
-        value = self.get_extracted_expression()
 
-        if type(value) is int:
-            return Int(value)
+        if type(self.literal) is int:
+            return Int(self.literal)
 
-        return Float(value)
+        return Float(self.literal)
 
 class OperatorExpression(Expression):
     def __init__(self, line_str: str, op: str, already_evaluated: bool = False):
@@ -117,13 +118,9 @@ class OperatorExpression(Expression):
 
 
 class UnaryExpression(OperatorExpression):
-    def __init__(self, line_str: str, operand: typing.Union[typing.List[Token], Expression, Object], op: str):
+    def __init__(self, line_str: str, operand: Union[Expression, Object], op: str):
         super().__init__(line_str, op)
-
-
-        from .parser import Parser
-        self.operand = Parser.parse_expression(operand, self.line_str) if type(operand) is list else operand
-
+        self.operand = operand
 
     def eval(self, program, scope_variables):
 
@@ -135,13 +132,11 @@ class UnaryExpression(OperatorExpression):
         return self.op(evaluated_operand)
 
 class BinaryExpression(OperatorExpression):
-    def __init__(self, line_str: str, left: typing.Union[typing.List[Token], Expression, Object], right: typing.Union[typing.List[Token], Expression, Primitive, NoPrimitive], op: str):
+    def __init__(self, line_str: str, left: Union[Object, Expression], right: Union[Expression, Object], op: str):
         super().__init__(line_str, op)
 
-        from .parser import Parser
-
-        self.left = Parser.parse_expression(left, self.line_str) if type(left) is list else left
-        self.right = Parser.parse_expression(right, self.line_str) if type(right) is list else right
+        self.left = left
+        self.right = right
 
     def eval(self, program, scope_variables):
 
@@ -159,24 +154,21 @@ class BinaryExpression(OperatorExpression):
 
 class ListExpression(Expression):
 
-    def __init__(self, line_str: str, list_expression: typing.List[typing.List[Token]]):
+    def __init__(self, line_str: str, list_expression: List[Expression]):
         super().__init__(line_str)
 
-        from .parser import Parser
-        self.list_expression = [Parser.parse_expression(list_element, line_str) for list_element in list_expression]
+        self.list_expression = list_expression
 
     def eval(self, program, scope_variables):
         return ArrayList([expr(program, scope_variables) for expr in self.list_expression])
 
 
 class LambdaExpression(Expression):
-    def __init__(self, line_str: str, parameters: typing.List[str], expression: typing.Union[typing.List[Token], Expression]):
+    def __init__(self, line_str: str, parameters: List[str], expression: Expression):
         super().__init__(line_str)
 
-        from .parser import Parser
-
         self.parameters = parameters
-        self.expression = Parser.parse_expression(expression, line_str) if type(expression) is list else expression
+        self.expression = expression
 
     def eval(self, program, scope_variables):
         from .function import LambdaFunction
@@ -184,13 +176,12 @@ class LambdaExpression(Expression):
 
 
 class ReadBufferExpression(Expression):
-    def __init__(self, line_str: str, file_expression: typing.List[Token]):
+    def __init__(self, line_str: str, file_expression: Expression):
         super().__init__(line_str)
-
-        from .parser import Parser
-        self.file_expression = Parser.parse_expression(file_expression, line_str)
+        self.file_expression = file_expression
 
     def eval(self, program, scope_variables):
+
         file = self.file_expression(program, scope_variables)
 
         if not issubclass(type(file), IOStream):
@@ -208,19 +199,17 @@ class ImaginaryUnitExpression(Expression):
         return Complex(from_number=None, real=Int(0), imag=Int(1))
 
 class ComplexCallExpression(Expression):
-    def __init__(self, line_str, parameters: typing.List[typing.List[Token]]):
+    def __init__(self, line_str, parameters: List[Expression]):
         super().__init__(line_str)
-
-        from .parser import Parser
-        self.numerical_expressions = [Parser.parse_expression(parameter, line_str) for parameter in parameters]
+        self.parameters = parameters
 
     def eval(self, program, scope_variables):
-        num_params = len(self.numerical_expressions)
+        num_params = len(self.parameters)
 
         if num_params != 2:
             error(f"Complex call expression requires real and imag part but {num_params} were given")
 
-        values = list(map(lambda param: param(program, scope_variables), self.numerical_expressions))
+        values = list(map(lambda param: param(program, scope_variables), self.parameters))
 
         if not issubclass(values[0].__class__, RealNumber) or not issubclass(values[1].__class__, RealNumber):
             error(f"Complex call expression requires two real numbers to build a complex number but ({values[0]}, {values[1]}) were given")

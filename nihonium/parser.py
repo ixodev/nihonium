@@ -46,37 +46,47 @@ class Parser:
             return Parser.parse_expression(expression[1:-1], line_str)
 
         if ExpressionPatternRecognizer.is_native_function_call(expression):
+
+            expr = ExpressionPatternRecognizer.extract_native_function_call(expression)
+            name, unparsed_parameters = ExpressionPatternRecognizer.extract_function_call(expr)
+            parameters = [Parser.parse_expression(parameter, line_str) for parameter in unparsed_parameters]
+
+
             return NativeFunctionCallExpression(
                 line_str,
-                ExpressionPatternRecognizer.extract_native_function_call(expression)
+                name, parameters
             )
 
         elif ExpressionPatternRecognizer.is_complex_call_expression(expression):
-            return ComplexCallExpression(line_str, ExpressionPatternRecognizer.extract_complex_call_expression(expression))
+            parameters = [Parser.parse_expression(param, line_str) for param in ExpressionPatternRecognizer.extract_complex_call_expression(expression)]
+            return ComplexCallExpression(line_str, parameters)
 
         elif ExpressionPatternRecognizer.is_function_call(expression):
-            return FunctionCallExpression(line_str, expression)
+            name, unparsed_parameters = ExpressionPatternRecognizer.extract_function_call(expression)
+            parameters = [Parser.parse_expression(parameter, line_str) for parameter in unparsed_parameters]
+
+            return FunctionCallExpression(line_str, name, parameters)
 
         elif ExpressionPatternRecognizer.is_binary_expression(expression):
             left, right, op = ExpressionPatternRecognizer.extract_binary_expression(expression)
             operator_type = op.get_type()
-            return BinaryExpression(line_str, left, right, operator_type)
+            return BinaryExpression(line_str, Parser.parse_expression(left, line_str), Parser.parse_expression(right, line_str), operator_type)
 
         elif ExpressionPatternRecognizer.is_unary_expression(expression):
             op, operand = ExpressionPatternRecognizer.extract_unary_expression(expression)
             operator_type = op.get_type()
-            return UnaryExpression(line_str, operand, operator_type)
+            return UnaryExpression(line_str, Parser.parse_expression(operand, line_str), operator_type)
 
         elif ExpressionPatternRecognizer.is_lambda_expression(expression):
             parameters, function_body = ExpressionPatternRecognizer.extract_lambda_expression(expression)
-            return LambdaExpression(line_str, parameters, function_body)
+            return LambdaExpression(line_str, parameters, Parser.parse_expression(function_body, line_str))
 
         elif ExpressionPatternRecognizer.is_io_read_expression(expression):
-            return ReadBufferExpression(line_str, ExpressionPatternRecognizer.extract_io_read_expression(expression))
+            return ReadBufferExpression(line_str, Parser.parse_expression(ExpressionPatternRecognizer.extract_io_read_expression(expression), line_str))
 
         elif ExpressionPatternRecognizer.is_boolean_atomic_expression(expression):
-            return BooleanAtomicExpression(line_str,
-                                           ExpressionPatternRecognizer.extract_boolean_atomic_expression(expression))
+            return BooleanExpression(line_str,
+                                           ExpressionPatternRecognizer.extract_boolean_atomic_expression(expression)[0].get_value())
 
         elif ExpressionPatternRecognizer.is_null_atomic_expression(expression):
             return NullExpression(line_str)
@@ -85,16 +95,16 @@ class Parser:
             return ImaginaryUnitExpression(line_str)
 
         elif ExpressionPatternRecognizer.is_number(expression):
-            return NumberExpression(line_str, expression)
+            return NumberExpression(line_str, ExpressionPatternRecognizer.extract_number(expression).get_value())
 
         elif ExpressionPatternRecognizer.is_string(expression):
-            return StringExpression(line_str, expression)
+            return StringExpression(line_str, ExpressionPatternRecognizer.extract_string(expression).get_value())
 
         elif ExpressionPatternRecognizer.is_variable(expression):
-            return VariableExpression(line_str, expression)
+            return VariableExpression(line_str, ExpressionPatternRecognizer.extract_variable(expression).get_value())
 
         elif ExpressionPatternRecognizer.is_list_expression(expression):
-            return ListExpression(line_str, ExpressionPatternRecognizer.extract_list_expression(expression))
+            return ListExpression(line_str, [Parser.parse_expression(expr, line_str) for expr in ExpressionPatternRecognizer.extract_list_expression(expression)])
 
         return UnknownExpression(line_str)
 
