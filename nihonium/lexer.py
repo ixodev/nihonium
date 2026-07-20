@@ -59,9 +59,9 @@ class Lexer:
             self.forward()
 
         if "." in result:
-            return Token(TOKEN_TYPE_NUMBER, float(result))
+            return Token(TOKEN_TYPE_FLOAT, float(result))
 
-        return Token(TOKEN_TYPE_NUMBER, int(result))
+        return Token(TOKEN_TYPE_INT, int(result))
 
     def string(self):
         self.forward()

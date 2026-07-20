@@ -91,7 +91,7 @@ class StatementPatternRecognizer:
         parameters_cleaned = []
 
         for parameter in parameters:
-            if not parameter.is_type(TOKEN_TYPE_COMMA) and (parameter.get_type() in [TOKEN_TYPE_IDENT, TOKEN_TYPE_NUMBER, TOKEN_TYPE_STRING]):
+            if not parameter.is_type(TOKEN_TYPE_COMMA) and (parameter.get_type() in [TOKEN_TYPE_IDENT, TOKEN_TYPE_INT, TOKEN_TYPE_FLOAT, TOKEN_TYPE_STRING]):
                 parameters_cleaned.append(parameter.get_value())
 
         return parameters_cleaned
@@ -402,17 +402,25 @@ class StatementPatternRecognizer:
 
 
 class ExpressionPatternRecognizer:
-    def __init__(self):
-        pass
 
     @staticmethod
-    def is_number(expression: List[Token]):
+    def is_int(expression: List[Token]):
         if len(expression) == 1 and isinstance(expression[0], Token):
-            return expression[0].is_type(TOKEN_TYPE_NUMBER)
+            return expression[0].is_type(TOKEN_TYPE_INT)
         return False
 
     @staticmethod
-    def extract_number(expression: List[Token]):
+    def is_float(expression: List[Token]):
+        if len(expression) == 1 and isinstance(expression[0], Token):
+            return expression[0].is_type(TOKEN_TYPE_FLOAT)
+        return False
+
+    @staticmethod
+    def extract_int(expression: List[Token]):
+        return expression[0]
+
+    @staticmethod
+    def extract_float(expression: List[Token]):
         return expression[0]
 
     @staticmethod

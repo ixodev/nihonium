@@ -99,16 +99,20 @@ class StringExpression(Literal):
     def eval(self, program, scope_variables):
         return String(self.literal[1:-1])
 
-class NumberExpression(Literal):
-    def __init__(self, line_str: str, literal: Union[int, float]):
+class IntExpression(Literal):
+    def __init__(self, line_str: str, literal: int):
         super().__init__(line_str, literal)
 
     def eval(self, program, scope_variables):
+        return Int(self.literal)
 
-        if type(self.literal) is int:
-            return Int(self.literal)
+class FloatExpression(Literal):
+    def __init__(self, line_str: str, literal: float):
+        super().__init__(line_str, literal)
 
+    def eval(self, program, scope_variables):
         return Float(self.literal)
+
 
 class OperatorExpression(Expression):
     def __init__(self, line_str: str, op: str, already_evaluated: bool = False):

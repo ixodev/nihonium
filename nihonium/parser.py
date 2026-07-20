@@ -94,8 +94,11 @@ class Parser:
         elif ExpressionPatternRecognizer.is_imaginary_unit_keyword_expression(expression):
             return ImaginaryUnitExpression(line_str)
 
-        elif ExpressionPatternRecognizer.is_number(expression):
-            return NumberExpression(line_str, ExpressionPatternRecognizer.extract_number(expression).get_value())
+        elif ExpressionPatternRecognizer.is_int(expression):
+            return IntExpression(line_str, ExpressionPatternRecognizer.extract_int(expression).get_value())
+
+        elif ExpressionPatternRecognizer.is_float(expression):
+            return FloatExpression(line_str, ExpressionPatternRecognizer.extract_float(expression).get_value())
 
         elif ExpressionPatternRecognizer.is_string(expression):
             return StringExpression(line_str, ExpressionPatternRecognizer.extract_string(expression).get_value())
